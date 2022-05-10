@@ -234,7 +234,24 @@ def independent_pair(a1, a2):
     a1.is_neg_effect(p) returns true is p is in a1.get_delete()
     """
     "*** YOUR CODE HERE ***"
-
+    add1 = a1.get_add()
+    add2 = a2.get_add()
+    del1 = a1.get_delete()
+    del2 = a2.get_delete()
+    for p in add1:
+        if a2.is_neg_effect(p):
+            return False
+    for p in add2:
+        if a1.is_neg_effect(p):
+            return False
+    for p in del1:
+        if a2.is_pre_cond(p):
+            return False
+    for p in del2:
+        if a1.is_pre_cond(p):
+            return False
+    return True  # TODO are negations also propositions? if so, we need to also check the add list, not only the del
+    # list
 
 if __name__ == '__main__':
     import sys
