@@ -250,8 +250,8 @@ def independent_pair(a1, a2):
     for p in del2:
         if a1.is_pre_cond(p):
             return False
-    return True  # TODO are negations also propositions? if so, we need to also check the add list, not only the del
-    # list
+    return True
+
 
 if __name__ == '__main__':
     import sys
