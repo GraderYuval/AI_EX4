@@ -42,12 +42,14 @@ class PlanningProblem:
 
     def get_start_state(self):
         "*** YOUR CODE HERE ***"
+        return self.initialState
 
     def is_goal_state(self, state):
         """
         Hint: you might want to take a look at goal_state_not_in_prop_payer function
         """
         "*** YOUR CODE HERE ***"
+        return self.goal.issubset(state)
 
     def get_successors(self, state):
         """
@@ -64,6 +66,12 @@ class PlanningProblem:
         """
         self.expanded += 1
         "*** YOUR CODE HERE ***"
+        triplets = []
+        for action in self.actions:
+            if action.all_preconds_in_list(state):
+                successor = frozenset().union((set(state) - set(action.get_delete())).union(set(action.get_add())))
+                triplets.append((successor, action, 1))
+        return triplets
 
     @staticmethod
     def get_cost_of_actions( actions):
