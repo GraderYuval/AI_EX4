@@ -102,6 +102,18 @@ class PlanningProblem:
             self.actions.append(act)
 
 
+def _is_fixed(graph, level):
+    if level == 0:
+        return False
+
+    if len(graph[level].get_proposition_layer().get_propositions()) == \
+            len(graph[level - 1].get_proposition_layer().get_propositions()) and \
+            len(graph[level].get_proposition_layer().get_mutex_props()) == \
+            len(graph[level - 1].get_proposition_layer().get_mutex_props()):
+        return True
+    return False
+
+
 def max_level(state, planning_problem):
     """
     The heuristic value is the number of layers required to expand all goal propositions.
@@ -114,6 +126,24 @@ def max_level(state, planning_problem):
     pg_init.set_proposition_layer(prop_layer_init)   #update the new plan graph level with the the proposition layer
     """
     "*** YOUR CODE HERE ***"
+    level = 0
+    prop_layer_init = PropositionLayer()  # create a new proposition layer
+    for prop in state:
+        prop_layer_init.add_proposition(prop)        #update the proposition layer with the propositions of the state
+    pg_init = PlanGraphLevel()                   #create a new plan graph level (level is the action layer and the propositions layer)
+    pg_init.set_proposition_layer(prop_layer_init)   #update the new plan graph level with the the proposition layer
+    graph = [pg_init]
+
+    while planning_problem.goal_state_not_in_prop_layer(graph[level].get_proposition_layer().get_propositions()):
+        if _is_fixed(graph, level):
+            return float('inf')
+            # this means we stopped the while loop above because we reached a fixed point in the graph.
+            #  nothing more to do, we failed!
+        level += 1
+        pg_next = PlanGraphLevel()  # create new PlanGraph object
+        pg_next.expand(graph[level - 1])  # calls the expand function, which you are implementing in the PlanGraph class
+        graph.append(pg_next)  # appending the new level to the plan graph
+    return level
 
 
 def level_sum(state, planning_problem):
@@ -122,6 +152,30 @@ def level_sum(state, planning_problem):
     If the goal is not reachable from the state your heuristic should return float('inf')
     """
     "*** YOUR CODE HERE ***"
+    found = {goal: False for goal in planning_problem.goal}
+    level = 0
+    score = 0
+    prop_layer_init = PropositionLayer()  # create a new proposition layer
+    for prop in state:
+        prop_layer_init.add_proposition(prop)        #update the proposition layer with the propositions of the state
+    pg_init = PlanGraphLevel()                   #create a new plan graph level (level is the action layer and the propositions layer)
+    pg_init.set_proposition_layer(prop_layer_init)   #update the new plan graph level with the the proposition layer
+    graph = [pg_init]
+
+    while planning_problem.goal_state_not_in_prop_layer(graph[level].get_proposition_layer().get_propositions()):
+        if _is_fixed(graph, level):
+            return float('inf')
+            # this means we stopped the while loop above because we reached a fixed point in the graph.
+            #  nothing more to do, we failed!
+        level += 1
+        pg_next = PlanGraphLevel()  # create new PlanGraph object
+        pg_next.expand(graph[level - 1])  # calls the expand function, which you are implementing in the PlanGraph class
+        for sub_goal in planning_problem.goal:
+            if sub_goal in pg_next.get_proposition_layer().get_propositions() and not found[sub_goal]:
+                found[sub_goal] = True
+                score += level
+        graph.append(pg_next)  # appending the new level to the plan graph
+    return score
 
 
 def is_fixed(graph, level):
