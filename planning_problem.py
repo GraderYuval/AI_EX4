@@ -68,7 +68,7 @@ class PlanningProblem:
         "*** YOUR CODE HERE ***"
         triplets = []
         for action in self.actions:
-            if action.all_preconds_in_list(state):
+            if not action.is_noop() and action.all_preconds_in_list(state):
                 successor = frozenset().union((set(state) - set(action.get_delete())).union(set(action.get_add())))
                 triplets.append((successor, action, 1))
         return triplets
